@@ -1,5 +1,5 @@
 from supabase import create_client
-from mistralai import MistralClient
+from openai import OpenAI
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -34,7 +34,10 @@ supabase = create_client(supabase_url, supabase_key)
 logger.info("Connexion Supabase établie")
 
 logger.info("Tentative de connexion à Mistral...")
-client = MistralClient(api_key=mistral_key)
+client = OpenAI(
+    base_url="https://api.mistral.ai/v1",
+    api_key=mistral_key
+)
 logger.info("Connexion Mistral établie")
 
 def get_document_hash(content):
@@ -72,18 +75,15 @@ def classify_document(title, content):
         {{"theme": "nom_du_theme", "category": "type_de_document"}}
         """
         
-        # Utilisation de la nouvelle API Mistral
-        messages = [
-            {"role": "system", "content": "Vous êtes un expert en classification de documents juridiques et fiscaux."},
-            {"role": "user", "content": prompt}
-        ]
-        
-        chat_response = client.chat(
+        chat_completion = client.chat.completions.create(
             model="mistral-medium",
-            messages=messages,
+            messages=[
+                {"role": "system", "content": "Vous êtes un expert en classification de documents juridiques et fiscaux."},
+                {"role": "user", "content": prompt}
+            ]
         )
         
-        result = json.loads(chat_response.messages[-1].content)
+        result = json.loads(chat_completion.choices[0].message.content)
         return result
         
     except Exception as e:
