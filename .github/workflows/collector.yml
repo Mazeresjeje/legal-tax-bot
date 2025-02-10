@@ -25,8 +25,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install --upgrade mistralai
-        pip install supabase requests beautifulsoup4 python-dotenv
+        pip install openai supabase-py requests beautifulsoup4 python-dotenv
 
     - name: Debug Environment
       run: |
