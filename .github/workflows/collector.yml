@@ -1,0 +1,45 @@
+name: Legal Document Collector
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'  # Toutes les 12 heures
+  workflow_dispatch:  # Permet l'exécution manuelle
+
+jobs:
+  collect-documents:
+    runs-on: ubuntu-latest
+    
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install supabase mistralai requests beautifulsoup4 python-dotenv
+
+    - name: Run collector
+      run: python scripts/collector.py
+
+    - name: Log collection status
+      if: always()
+      run: |
+        echo "Collection terminée le $(date)" >> collection_log.txt
+        
+    - name: Commit and push logs
+      if: always()
+      run: |
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add collection_log.txt
+        git commit -m "Mise à jour des logs" || echo "Pas de changements"
+        git push || echo "Rien à pousser"
