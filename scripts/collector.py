@@ -1,5 +1,5 @@
 from supabase import create_client
-import mistralai
+from mistralai import MistralClient
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -34,7 +34,7 @@ supabase = create_client(supabase_url, supabase_key)
 logger.info("Connexion Supabase établie")
 
 logger.info("Tentative de connexion à Mistral...")
-client = mistralai.MistralClient(api_key=mistral_key)
+client = MistralClient(api_key=mistral_key)
 logger.info("Connexion Mistral établie")
 
 def get_document_hash(content):
