@@ -1,6 +1,5 @@
 from supabase import create_client
 from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
 import requests
 from bs4 import BeautifulSoup
 import os
@@ -25,10 +24,6 @@ supabase = create_client(
 mistral = MistralClient(
     api_key=os.environ.get("MISTRAL_API_KEY")
 )
-
-def get_document_hash(content):
-    """Génère un hash unique pour un document"""
-    return hashlib.sha256(content.encode()).hexdigest()
 
 def classify_document(title, content):
     """Classifie le document avec Mistral AI"""
@@ -61,14 +56,18 @@ def classify_document(title, content):
         {{"theme": "nom_du_theme", "category": "type_de_document"}}
         """
         
-        messages = [
-            ChatMessage(role="system", content="Vous êtes un expert en classification de documents juridiques et fiscaux."),
-            ChatMessage(role="user", content=prompt)
-        ]
-        
         response = mistral.chat(
             model="mistral-medium",
-            messages=messages
+            messages=[
+                {
+                    "role": "system",
+                    "content": "Vous êtes un expert en classification de documents juridiques et fiscaux."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
         )
         
         result = json.loads(response.choices[0].message.content)
